@@ -1,0 +1,4 @@
+ - firebase as rpc / message queue
+ - client app authenticates qith firebase
+ - to initiate RPC, write rpc meta data to private (e.g. /$user/..) dataRef
+ - return value / result from RPC triggers callback
