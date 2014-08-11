@@ -1,0 +1,10 @@
+{
+  "firebase": "saskavi",
+  "public": "./public",
+  "rules": "./config/firebase-rules.json",
+  "ignore": [
+    "firebase.json",
+    "**/.*",
+    "**/node_modules/**"
+  ]
+}

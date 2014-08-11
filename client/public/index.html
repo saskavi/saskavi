@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>saskavi</title>
+    <script src="https://cdn.firebase.com/js/client/1.0.19/firebase.js"></script>
+    <script src="https://cdn.firebase.com/js/simple-login/1.6.2/firebase-simple-login.js"></script>
+</head>
+<body>
+    <script>
+
+        var fBase = new Firebase('https://saskavi.firebaseio.com');
+
+
+        function rpcTest(args, cb){
+            var rpcData = {
+                "function": "rpcTest",
+                "args": args
+            };
+            //dispatch rpc by pushing the rpc data
+            var rpcBus = fBase.child("__saskavi-rpc");
+            var rpcRef = rpcBus.child(window.user.uid).push(rpcData);
+            // when the result for this rpc is set, call the callback
+            rpcRef.child('result').on('value', function(snapshot){
+                //TODO: ignore the initial cb / null / triggered by the push
+                console.log("snapshot", snapshot.val());
+                cb(null, snapshot.val());
+            });
+        }
+
+
+        var auth = new FirebaseSimpleLogin(fBase, function(error, user) {
+            // an error occurred while attempting login
+            if (error) {
+                console.log("login error", error);
+            }
+            // user authenticated with Firebase
+            else if (user) {
+                console.log("user login:", user.uid);
+                window.user = user;
+                rpcTest("hello world", function(err, result){
+                    console.log("rpcTest result:", result);
+                    //TODO:  ack or delete rpc ref for this call?
+                });
+            }
+            // no one is logged in / user logged out
+            else {
+                //require log in
+                auth.login('github');
+            }
+        });
+
+
+
+    </script>
+</body>
+</html>

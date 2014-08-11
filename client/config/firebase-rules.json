@@ -1,0 +1,15 @@
+{
+    "rules": {
+
+        ".read": true,
+        ".write": true,
+
+        "__saskavi-rpc" : {
+            "$user_id": {
+                ".read": "auth.uid === $user_id",
+                ".write": "auth.uid === $user_id"
+            }
+        }
+
+    }
+}
