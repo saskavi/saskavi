@@ -1,0 +1,83 @@
+#!/usr/bin/env node
+
+var fs = require('fs');
+var path = require('path');
+
+(function() {
+	var makeLogFunc = function(pre, post) {
+		return function() {
+			var args = [pre].concat(
+				Array.prototype.slice.call(arguments), [post]);
+			console.log.apply(console, args);
+		};
+	};
+
+	var warn = makeLogFunc('\x1B[33m', '\x1B[39m');
+	var error = makeLogFunc('\x1B[31m', '\x1B[39m');
+	var info = makeLogFunc('\x1B[36m', '\x1B[39m');
+	var success = makeLogFunc('\x1B[32m', '\x1B[39m');
+	var msg  = makeLogFunc('', '');
+
+
+	var readConfig = function() {
+		try {
+			return JSON.parse(fs.readFileSync("saskavi.json"));
+		} catch(e) {}
+
+		return null;
+	};
+
+	var cwdRel = function(p) { // get path relative to current working directory
+		return path.join(process.cwd(), p);
+	};
+
+	var genMap = function(files) {
+		if (!Array.isArray(files))
+			files = [files];
+
+		return files.reduce(function(m, mod) {
+			var loaded = require(cwdRel(mod));
+			m[mod] = loaded;
+			return m;
+		}, {});
+	};
+
+	var actions = {
+		"run": function(args) {
+			var config = readConfig();
+			if (!config)
+				return error("Error: saskavi.json file is missing from current directory");
+
+			console.log("firebase root: ", config.firebase.root);
+			console.log("saskavi files: ", config.files);
+
+			var funcMap = genMap(config.files);
+			console.log(funcMap);
+		},
+
+		"init": function(args) {
+		},
+
+		"deploy": function(args) {
+		}
+	};
+
+	var startup = function() {
+		var args = process.argv.slice(
+			process.argv[0] === 'node' ? 2 : 1);
+
+		var action = args[0];
+		if (!action)
+			return error("saskavi needs an action: run, init or deploy.");
+
+		action = action.toLowerCase();
+
+		if (!actions[action])
+			return error("Unrecognized action");
+
+		actions[action](args.slice(1));
+	};	
+
+
+	startup();
+})();

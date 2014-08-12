@@ -21,7 +21,7 @@
             var rpcBus = fBase.child("__saskavi-rpc");
             var rpcRef = rpcBus.child(window.user.uid).push(rpcData);
             // when the result for this rpc is set, call the callback
-            rpcRef.child('result').on('value', function(snapshot){
+            rpcRef.child('result').once('value', function(snapshot){
                 //TODO: ignore the initial cb / null / triggered by the push
                 console.log("snapshot", snapshot.val());
                 cb(null, snapshot.val());
