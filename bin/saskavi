@@ -3,6 +3,8 @@
 var fs = require('fs');
 var path = require('path');
 
+var bind = require('../lib').bind;
+
 (function() {
 	var makeLogFunc = function(pre, post) {
 		return function() {
@@ -52,7 +54,8 @@ var path = require('path');
 			console.log("saskavi files: ", config.files);
 
 			var funcMap = genMap(config.files);
-			console.log(funcMap);
+
+			bind(config.firebase.root, funcMap);
 		},
 
 		"init": function(args) {

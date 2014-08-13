@@ -1,6 +1,6 @@
 {
 	"firebase": {
-		"root": "https://<your-app>.firebaseio.com/"
+		"root": "https://saskavi.firebaseio.com/"
 	},
 	"files": "reverse.js"
 }
