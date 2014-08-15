@@ -50,12 +50,14 @@ var bind = require('../lib').bind;
 			if (!config)
 				return error("Error: saskavi.json file is missing from current directory");
 
+			var fbRoot = process.env['SASKAVI_FIREBASE_ROOT'] || config.firebase.root;
+
 			console.log("firebase root: ", config.firebase.root);
 			console.log("saskavi files: ", config.files);
 
 			var funcMap = genMap(config.files);
 
-			bind(config.firebase.root, funcMap);
+			bind(fbRoot, funcMap);
 		},
 
 		"init": function(args) {
