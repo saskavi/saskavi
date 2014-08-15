@@ -7,13 +7,13 @@ saskavi is an open source platform for realtime serverless and distributed RPC. 
 
 ### to run the example
 
-The example/run script will start both a http-server serving ./public and do a "saskavi run" in the server directory
+The `example/run` script will start both a http-server serving `./public` and do a `saskavi run` in the server directory
 
 You can run the script:
-    ./example/run
+    `./example/run`
 
 You can use npm run-script:
-    npm run-script example
+   `npm run-script example`
 
 
 
