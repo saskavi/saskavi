@@ -3,6 +3,9 @@
 var fs = require('fs');
 var path = require('path');
 
+var targz = require('tar.gz');
+var request = require('request');
+
 var bind = require('../lib').bind;
 
 (function() {
@@ -64,6 +67,37 @@ var bind = require('../lib').bind;
 		},
 
 		"deploy": function(args) {
+			// bundle up directory and push to deployment server
+			//
+
+			// just make sure that the user is in the saskavi directory
+			if (!fs.existsSync('saskavi.json'))
+				return error('No saskavi.json present in the current directory.  Please run this command from the root directory of your saskvi deployment.');
+
+			info("Creating deployment archive...");
+			var compress = new targz().compress(process.cwd() + '/.', '/tmp/saskavi-deployment.tar.gz', function(err){
+				if(err)
+					return error("Sorry, failed to create deployment archive");
+
+
+				// the compressed file is ready, make post request
+				info("Pushing deployment...");
+				fs.createReadStream('/tmp/saskavi-deployment.tar.gz').pipe(
+					request.post({
+						url: "http://localhost:16000/deploy",
+						headers: {
+							'Content-Type': 'application/x-gzip'
+						}}, function(err, r,body) {
+							if (err)
+								return error("Failed to push deployment. " + err.message);
+
+							var rr = JSON.parse(body);
+							if (rr.status)
+								return success("Deployment pushed, your RPC handler is running.");
+
+							error("Server deployment failed, " + (r.message || "Unknown Error"));
+						}));
+			});
 		}
 	};
 
