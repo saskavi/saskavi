@@ -1,0 +1,19 @@
+#!/bin/sh
+
+cd $(dirname $0 )
+echo saskavi run: `pwd`
+
+
+echo "starting HTTP server"
+http-server ./public &
+
+echo "running saskavi functions"
+cd ./server
+../../bin/saskavi run &
+
+# wait for servers to stop
+for job in `jobs -p`
+do
+    wait $job
+done
+

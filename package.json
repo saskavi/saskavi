@@ -12,7 +12,16 @@
     "url": "https://github.com/saskavi/saskavi/issues"
   },
   "homepage": "https://github.com/saskavi/saskavi",
+
+  "bin": {"saskavi": "./bin/saskavi"},
+
+  "scripts": {"example": "./example/run"},
+
+
   "dependencies": {
     "firebase": "~1.0.19"
+  },
+  "devDependencies": {
+    "http-server": "^0.6.1"
   }
 }
