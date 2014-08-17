@@ -44,7 +44,7 @@ function run(modulePath){
     // make sure we got the right file and teh module resolves
     var moduleFile = require.resolve(modulePath);
     var moduleFileRelative = path.relative(process.cwd(), moduleFile);
-    console.log("exporting functions from".yellow, moduleFileRelative.italic);
+    console.log("    exporting functions from".yellow, moduleFileRelative.italic);
 
     // load package.json to lookup configuration values
     var packageJSON = path.join(modulePath, 'package.json');
@@ -57,6 +57,8 @@ function run(modulePath){
     var fbRoot = program.firebase
         || process.env['SASKAVI_FIREBASE_ROOT']
             || moduleInfo.firebase.root;
+
+    console.log("    running on firebase root:".yellow, fbRoot);
 
     // require the module, and bind it saskavi style
     var module = require(modulePath);
