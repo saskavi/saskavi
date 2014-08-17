@@ -29,9 +29,14 @@ program
     .action(init);
 
 program
-    .command('deploy')
+    .command('deploy [module]')
     .description('deploy module to saskavi service')
     .action(deploy);
+
+program
+    .command('kill')
+    .description('kills a running saskavi deployment')
+    .action(kill);
 
 program.parse(process.argv);
 
@@ -78,6 +83,16 @@ function deploy(modulePath){
         || "0.saskavi.com";
 
     actions.push(moduleFileRelative, pushHost);
+}
+
+function kill(modulePath) {
+    console.log("saskavi kill".bold.green);
+
+    var pushHost = program.host
+        || process.env["SASKAVI_PUSH_HOST"]
+        || "0.saskavi.com";
+
+    actions.kill("", pushHost);
 }
 
 
