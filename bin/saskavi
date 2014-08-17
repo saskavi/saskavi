@@ -6,211 +6,93 @@ var findup = require('findup-sync');
 var pkginfo = require('pkginfo');
 var targz = require('tar.gz');
 var request = require('request');
-var bind = require('../lib').bind;
+var actions = require('../lib');
 
 
 var program = require('commander');
 var colors = require('colors');
 
- program
-   .version('0.0.1')
-   .option('-c, --config <path>', 'set config path.')
-   .option('--firebase <url>', 'use the specified firebase to orchestrate RPC calls');
+program
+    .version('0.0.1')
+    .option('-c, --config <path>', 'set config path.')
+    .option('--host <host>', 'Saskavi deployment host to push to')
+    .option('--firebase <url>', 'use the specified firebase to orchestrate RPC calls');
 
- program
-   .command('run [module]')
-   .description('run the module locally.  module defaults to module found in current directory or parent folders')
-   .action(run);
+program
+    .command('run [module]')
+    .description('run the module locally.  module defaults to module found in current directory or parent folders')
+    .action(run);
 
- program
-   .command('initialize')
-   .description('initialize a new saskavi module')
-   .action(init);
+program
+    .command('initialize')
+    .description('initialize a new saskavi module')
+    .action(init);
 
- program
-   .command('deploy')
-   .description('deploy module to saskavi service')
-   .action(deploy);
+program
+    .command('deploy')
+    .description('deploy module to saskavi service')
+    .action(deploy);
 
- program.parse(process.argv);
+program.parse(process.argv);
 
 
 
 function run(modulePath){
-	console.log("saskavi run".bold.green);
-	modulePath =  findModulePath(modulePath);
+    console.log("saskavi run".bold.green);
+    modulePath =  findModulePath(modulePath);
 
-	// make sure we got the right file and teh module resolves
-	var moduleFile = require.resolve(modulePath);
-	var moduleFileRelative = path.relative(process.cwd(), moduleFile);
-	console.log("exporting functions from".yellow, moduleFileRelative.italic);
+    // make sure we got the right file and teh module resolves
+    var moduleFile = require.resolve(modulePath);
+    var moduleFileRelative = path.relative(process.cwd(), moduleFile);
+    console.log("exporting functions from".yellow, moduleFileRelative.italic);
 
-	// load package.json to lookup configuration values
-	var packageJSON = path.join(modulePath, 'package.json');
-	var moduleInfo = JSON.parse(fs.readFileSync(packageJSON));
+    // load package.json to lookup configuration values
+    var packageJSON = path.join(modulePath, 'package.json');
+    var moduleInfo = JSON.parse(fs.readFileSync(packageJSON));
 
-	// set firebase url, will use the first one of the following that is set:
-	//  1. command line --firebase argument
-	//  2. SASKAVI_FIREBASE_ROOT environment variable
-	//  3. firebase.root value in packag.json
-	var fbRoot = program.firebase
-				 || process.env['SASKAVI_FIREBASE_ROOT']
-				 || moduleInfo.firebase.root;
+    // set firebase url, will use the first one of the following that is set:
+    //  1. command line --firebase argument
+    //  2. SASKAVI_FIREBASE_ROOT environment variable
+    //  3. firebase.root value in packag.json
+    var fbRoot = program.firebase
+        || process.env['SASKAVI_FIREBASE_ROOT']
+            || moduleInfo.firebase.root;
 
-	// require the module, and bind it saskavi style
-	var module = require(modulePath);
-	bind(fbRoot, module);
+    // require the module, and bind it saskavi style
+    var module = require(modulePath);
+    actions.bind(fbRoot, module);
 }
 
 
 function deploy(modulePath){
-     console.log("saskavi deploy".bold.green);
-     modulePath =  findModulePath(modulePath);
+    console.log("saskavi deploy".bold.green);
+    modulePath =  findModulePath(modulePath);
+
+    var moduleFile = require.resolve(modulePath);
+    var moduleFileRelative = path.relative(process.cwd(), moduleFile);
+
+    var pushHost = program.host
+        || process.env["SASKAVI_PUSH_HOST"]
+        || "0.saskavi.com";
+
+    actions.push(moduleFileRelative, pushHost);
 }
 
 
 function init(){
-     console.log("saskavi init".bold.green);
+    console.log("saskavi init".bold.green);
 }
 
 
 
 function findModulePath(modulePath){
-	if (modulePath === undefined){
-		modulePath = path.dirname(findup('package.json'));
-	}
-	else{
-		modulePath = path.resolve(modulePath);
-	}
-	return modulePath;
+    if (modulePath === undefined){
+        modulePath = path.dirname(findup('package.json'));
+    }
+    else{
+        modulePath = path.resolve(modulePath);
+    }
+    return modulePath;
 }
 
-
-
-
-
-
-
-
-
-
-// var fs = require('fs');
-// var path = require('path');
-
-// var targz = require('tar.gz');
-// var request = require('request');
-
-// var bind = require('../lib').bind;
-
-// (function() {
-// 	var makeLogFunc = function(pre, post) {
-// 		return function() {
-// 			var args = [pre].concat(
-// 				Array.prototype.slice.call(arguments), [post]);
-// 			console.log.apply(console, args);
-// 		};
-// 	};
-
-// 	var warn = makeLogFunc('\x1B[33m', '\x1B[39m');
-// 	var error = makeLogFunc('\x1B[31m', '\x1B[39m');
-// 	var info = makeLogFunc('\x1B[36m', '\x1B[39m');
-// 	var success = makeLogFunc('\x1B[32m', '\x1B[39m');
-// 	var msg  = makeLogFunc('', '');
-
-
-// 	var readConfig = function() {
-// 		try {
-// 			return JSON.parse(fs.readFileSync("saskavi.json"));
-// 		} catch(e) {}
-
-// 		return null;
-// 	};
-
-// 	var cwdRel = function(p) { // get path relative to current working directory
-// 		return path.join(process.cwd(), p);
-// 	};
-
-// 	var genMap = function(files) {
-// 		if (!Array.isArray(files))
-// 			files = [files];
-
-// 		return files.reduce(function(m, mod) {
-// 			var loaded = require(cwdRel(mod));
-// 			m[mod] = loaded;
-// 			return m;
-// 		}, {});
-// 	};
-
-// 	var actions = {
-// 		"run": function(args) {
-// 			var config = readConfig();
-// 			if (!config)
-// 				return error("Error: saskavi.json file is missing from current directory");
-
-// 			var fbRoot = process.env['SASKAVI_FIREBASE_ROOT'] || config.firebase.root;
-
-// 			console.log("firebase root: ", config.firebase.root);
-// 			console.log("saskavi files: ", config.files);
-
-// 			var funcMap = genMap(config.files);
-
-// 			bind(fbRoot, funcMap);
-// 		},
-
-// 		"init": function(args) {
-// 		},
-
-// 		"deploy": function(args) {
-// 			// bundle up directory and push to deployment server
-// 			//
-
-// 			// just make sure that the user is in the saskavi directory
-// 			if (!fs.existsSync('saskavi.json'))
-// 				return error('No saskavi.json present in the current directory.  Please run this command from the root directory of your saskvi deployment.');
-
-// 			info("Creating deployment archive...");
-// 			var compress = new targz().compress(process.cwd() + '/.', '/tmp/saskavi-deployment.tar.gz', function(err){
-// 				if(err)
-// 					return error("Sorry, failed to create deployment archive");
-
-
-// 				// the compressed file is ready, make post request
-// 				info("Pushing deployment...");
-// 				fs.createReadStream('/tmp/saskavi-deployment.tar.gz').pipe(
-// 					request.post({
-// 						url: "http://localhost:16000/deploy",
-// 						headers: {
-// 							'Content-Type': 'application/x-gzip'
-// 						}}, function(err, r,body) {
-// 							if (err)
-// 								return error("Failed to push deployment. " + err.message);
-
-// 							var rr = JSON.parse(body);
-// 							if (rr.status)
-// 								return success("Deployment pushed, your RPC handler is running.");
-
-// 							error("Server deployment failed, " + (r.message || "Unknown Error"));
-// 						}));
-// 			});
-// 		}
-// 	};
-
-// 	var startup = function() {
-// 		var args = process.argv.slice(
-// 			process.argv[0] === 'node' ? 2 : 1);
-
-// 		var action = args[0];
-// 		if (!action)
-// 			return error("saskavi needs an action: run, init or deploy.");
-
-// 		action = action.toLowerCase();
-
-// 		if (!actions[action])
-// 			return error("Unrecognized action");
-
-// 		actions[action](args.slice(1));
-// 	};
-
-
-// 	startup();
-// })();
+// vim: set expandtab:
