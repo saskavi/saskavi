@@ -8,8 +8,6 @@ var targz = require('tar.gz');
 var request = require('request');
 var prompt = require('prompt');
 var actions = require('../lib');
-var uuid = require('node-uuid');
-
 
 var program = require('commander');
 var colors = require('colors');
@@ -94,7 +92,12 @@ function kill(modulePath) {
         || process.env["SASKAVI_PUSH_HOST"]
         || "0.saskavi.com";
 
-    actions.kill("", pushHost);
+    modulePath =  findModulePath(modulePath);
+
+    var moduleFile = require.resolve(modulePath);
+    var moduleFileRelative = path.relative(process.cwd(), moduleFile);
+
+    actions.kill(modulePath, pushHost);
 }
 
 
@@ -136,10 +139,7 @@ function init(){
                 description: "Application firebase root:".magenta
             }
         }}, function(err, res) {
-            res["id"] = uuid.v4();
-
             updatePackage({saskavi: res});
-            console.log(res);
         });
 }
 

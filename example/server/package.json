@@ -1,9 +1,9 @@
 {
-
   "name": "saskavi-example-server",
-
-  "firebase":  {
+  "firebase": {
     "root": "https://saskavi.firebaseio.com/"
+  },
+  "saskavi": {
+    "firebase": "https://saskavi.firebaseio.com"
   }
-
 }
