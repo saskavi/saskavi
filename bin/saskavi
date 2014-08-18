@@ -6,7 +6,9 @@ var findup = require('findup-sync');
 var pkginfo = require('pkginfo');
 var targz = require('tar.gz');
 var request = require('request');
+var prompt = require('prompt');
 var actions = require('../lib');
+var uuid = require('node-uuid');
 
 
 var program = require('commander');
@@ -24,7 +26,7 @@ program
     .action(run);
 
 program
-    .command('initialize')
+    .command('init')
     .description('initialize a new saskavi module')
     .action(init);
 
@@ -98,6 +100,47 @@ function kill(modulePath) {
 
 function init(){
     console.log("saskavi init".bold.green);
+    var packageFile = path.join(process.cwd(), "package.json");
+    if (!fs.existsSync(packageFile))
+        return console.log("No package.json found, make sure you've run npm init first, or you're in the same directory as the module.".red);
+
+    var pkg = JSON.parse(fs.readFileSync(packageFile));
+
+    var checkForFirebase = function() {
+        var fn = path.join(process.cwd(), "firebase.json");
+        if (fs.existsSync(fn)) {
+            var obj = JSON.parse(fs.readFileSync(fn));
+            return obj.firebase;
+        }
+
+        return null;
+    };
+
+    var updatePackage = function(withObj) {
+        for (var k in withObj) {
+            pkg[k] = withObj[k];
+        }
+
+        fs.writeFileSync(packageFile, JSON.stringify(pkg, null, "  "));
+    };
+
+    console.log("    Using module:".yellow, pkg.name);
+
+    // check if firebase.json exists here, if it does pull out the firebase property from it
+    var defaultFirebase = checkForFirebase();
+    prompt.message = "";
+    prompt.start();
+    prompt.get({
+        properties: {
+            firebase: {
+                description: "Application firebase root:".magenta
+            }
+        }}, function(err, res) {
+            res["id"] = uuid.v4();
+
+            updatePackage({saskavi: res});
+            console.log(res);
+        });
 }
 
 
