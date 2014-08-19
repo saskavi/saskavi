@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>saskavi</title>
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <script src="https://cdn.firebase.com/js/client/1.0.19/firebase.js"></script>
+    <script src="https://cdn.firebase.com/js/simple-login/1.6.2/firebase-simple-login.js"></script>
+	<script src="saskavi.js"></script>
+</head>
+<body>
+	<div class="container" style="margin-top: 50px">
+		<div class="row">
+			<div class="col-sm-12"><input class="form-control input-block" id="text-field" placeholder="Type some stuff here"></div>
+		</div>
+		<div class="row" style="margin-top: 10px">
+			<div class="col-sm-6 col-sm-offset-3"><button id="click" type="button" class="btn btn-primary btn-block">Click me for some action!</button></div>
+		</div>
+	</div>
+    <script>
+
+		document.addEventListener("DOMContentLoaded", function() {
+			document.getElementById("click").addEventListener("click", function(e) {
+				e.preventDefault();
+
+				var fBase = new Firebase('https://saskavi.firebaseio.com/slack');
+				var auth = new FirebaseSimpleLogin(fBase, function(error, user) {
+					// an error occurred while attempting login
+					if (error) {
+						console.log("login error", error);
+					}
+					// user authenticated with Firebase
+					else if (user) {
+						console.log("user login:", user.uid);
+						var sas = new Saskavi(fBase, user.uid);
+
+						var text = document.getElementById("text-field").value;
+						sas.call('sendMessageToSlack', {text: text}, function(err, ret) {
+							console.log("Call complete!", err, ret);
+						});
+					}
+					// no one is logged in / user logged out
+					else {
+						//require log in
+						auth.login('github');
+					}
+				});
+
+			});
+		});
+
+
+
+
+    </script>
+</body>
+</html>

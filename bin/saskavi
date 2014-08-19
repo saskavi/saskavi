@@ -61,7 +61,7 @@ function run(modulePath){
     //  3. firebase.root value in packag.json
     var fbRoot = program.firebase
         || process.env['SASKAVI_FIREBASE_ROOT']
-            || moduleInfo.firebase.root;
+            || moduleInfo.saskavi.firebase;
 
     console.log("    running on firebase root:".yellow, fbRoot);
 
