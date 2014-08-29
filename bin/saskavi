@@ -82,14 +82,14 @@ function deploy(modulePath){
     actions.push(moduleFileRelative, pushHost);
 }
 
-function kill(modulePath) {
+function kill() {
     console.log("saskavi kill".bold.green);
 
     var pushHost = program.host
         || process.env["SASKAVI_PUSH_HOST"]
         || "0.saskavi.com";
 
-    modulePath =  findModulePath(modulePath);
+    modulePath = findModulePath();
 
     var moduleFile = require.resolve(modulePath);
     var moduleFileRelative = path.relative(process.cwd(), moduleFile);
@@ -152,7 +152,7 @@ function init(){
 
 
 function findModulePath(modulePath){
-    if (modulePath === undefined){
+    if (!modulePath) {
         modulePath = path.dirname(findup('package.json'));
     }
     else{
