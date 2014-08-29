@@ -8,6 +8,7 @@ var targz = require('tar.gz');
 var request = require('request');
 var prompt = require('prompt');
 var actions = require('../lib');
+var uuid = require("node-uuid");
 
 var program = require('commander');
 var colors = require('colors');
@@ -100,24 +101,28 @@ function kill(modulePath) {
     actions.kill(modulePath, pushHost);
 }
 
+function writePackageJson(packageFile) {
+	var name = path.basename(path.dirname(packageFile));
+	var obj = {
+		name: name,
+		version: "0.0.1",
+		private: true,
+		description: "A saskavi powered module",
+	}
+
+	fs.writeFileSync(packageFile, JSON.stringify(obj, null, "  "));
+}
+
 
 function init(){
     console.log("saskavi init".bold.green);
     var packageFile = path.join(process.cwd(), "package.json");
-    if (!fs.existsSync(packageFile))
-        return console.log("No package.json found, make sure you've run npm init first, or you're in the same directory as the module.".red);
+    if (!fs.existsSync(packageFile)) {
+		console.log("No package.json was found in this directory, generating a fresh one for you.");
+		writePackageJson(packageFile);
+	}
 
     var pkg = JSON.parse(fs.readFileSync(packageFile));
-
-    var checkForFirebase = function() {
-        var fn = path.join(process.cwd(), "firebase.json");
-        if (fs.existsSync(fn)) {
-            var obj = JSON.parse(fs.readFileSync(fn));
-            return obj.firebase;
-        }
-
-        return null;
-    };
 
     var updatePackage = function(withObj) {
         for (var k in withObj) {
@@ -129,18 +134,11 @@ function init(){
 
     console.log("    Using module:".yellow, pkg.name);
 
+	if (pkg.saskavi)
+		return console.log("Sasakvi already initialized in current directory".red);
+
     // check if firebase.json exists here, if it does pull out the firebase property from it
-    var defaultFirebase = checkForFirebase();
-    prompt.message = "";
-    prompt.start();
-    prompt.get({
-        properties: {
-            firebase: {
-                description: "Application firebase root:".magenta
-            }
-        }}, function(err, res) {
-            updatePackage({saskavi: res});
-        });
+	updatePackage({saskavi: uuid.v4()});
 }
 
 

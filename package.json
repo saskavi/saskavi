@@ -26,7 +26,8 @@
     "pkginfo": "~0.3.0",
     "commander": "~2.3.0",
     "colors": "~0.6.2",
-    "prompt": "~0.2.13"
+    "prompt": "~0.2.13",
+    "node-uuid": "~1.4.1"
   },
   "devDependencies": {
     "http-server": "^0.6.1"
