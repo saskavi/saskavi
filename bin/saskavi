@@ -121,6 +121,9 @@ function init(){
 		console.log("No package.json was found in this directory, generating a fresh one for you.");
 		writePackageJson(packageFile);
 	}
+	else {
+		console.log("Adding saskavi to existing package.json".yellow);
+	}
 
     var pkg = JSON.parse(fs.readFileSync(packageFile));
 
