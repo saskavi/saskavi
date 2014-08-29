@@ -56,19 +56,15 @@ function run(modulePath){
     var packageJSON = path.join(modulePath, 'package.json');
     var moduleInfo = JSON.parse(fs.readFileSync(packageJSON));
 
-    // set firebase url, will use the first one of the following that is set:
-    //  1. command line --firebase argument
-    //  2. SASKAVI_FIREBASE_ROOT environment variable
-    //  3. firebase.root value in packag.json
-    var fbRoot = program.firebase
-        || process.env['SASKAVI_FIREBASE_ROOT']
-            || moduleInfo.saskavi.firebase;
+	var appid = moduleInfo.saskavi;
+	if (!appid)
+		return console.log("No saskavi configuration found in your package.json, run saskavi init yet?".red);
 
-    console.log("    running on firebase root:".yellow, fbRoot);
+    console.log("    your app-id:".yellow, appid);
 
     // require the module, and bind it saskavi style
     var module = require(modulePath);
-    actions.bind(fbRoot, module);
+    actions.bind(appid, module);
 }
 
 

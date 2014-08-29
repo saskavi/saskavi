@@ -5,11 +5,8 @@
 (function() {
 	"use strict";
 
-	var Saskavi = function(fbRoot, uid) {
-		if (!uid)
-			throw new Error("uid not supplied, an authenticated user id is required");
-
-		this.rpcBus = fbRoot.child("__saskavi-rpc").child(uid);
+	var Saskavi = function(appId) {
+		this.rpcBus = new Firebase("https://saskavi.firebaseio.com").child(appId).child("__saskavi-rpc");
 	};
 
 	function isFunction(functionToCheck) {
