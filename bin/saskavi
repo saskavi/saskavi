@@ -120,6 +120,15 @@ function init(){
     if (!fs.existsSync(packageFile)) {
 		console.log("No package.json was found in this directory, generating a fresh one for you.");
 		writePackageJson(packageFile);
+
+		var index = path.join(process.cwd(), "index.js");
+		if (!fs.existsSync(index)) {
+			console.log("Writing a bare-bone index.js");
+			fs.writeFileSync(index,
+							 "module.exports.hello = function(name, done) {\n" +
+							 "    done(null, 'Hello ' + name + ', welcome to saskavi!');\n" +
+							 "}\n");
+		}
 	}
 	else {
 		console.log("Adding saskavi to existing package.json".yellow);
