@@ -56,9 +56,9 @@ function run(modulePath){
     var packageJSON = path.join(modulePath, 'package.json');
     var moduleInfo = JSON.parse(fs.readFileSync(packageJSON));
 
-	var appid = moduleInfo.saskavi;
-	if (!appid)
-		return console.log("No saskavi configuration found in your package.json, run saskavi init yet?".red);
+    var appid = moduleInfo.saskavi;
+    if (!appid)
+        return console.log("No saskavi configuration found in your package.json, run saskavi init yet?".red);
 
     console.log("    your app-id:".yellow, appid);
 
@@ -77,9 +77,9 @@ function deploy(modulePath){
 
     var pushHost = program.host
         || process.env["SASKAVI_PUSH_HOST"]
-        || "0.saskavi.com";
+            || "0.saskavi.com";
 
-    actions.push(moduleFileRelative, pushHost);
+            actions.push(moduleFileRelative, pushHost);
 }
 
 function kill() {
@@ -87,26 +87,26 @@ function kill() {
 
     var pushHost = program.host
         || process.env["SASKAVI_PUSH_HOST"]
-        || "0.saskavi.com";
+            || "0.saskavi.com";
 
-    modulePath = findModulePath();
+            modulePath = findModulePath();
 
-    var moduleFile = require.resolve(modulePath);
-    var moduleFileRelative = path.relative(process.cwd(), moduleFile);
+            var moduleFile = require.resolve(modulePath);
+            var moduleFileRelative = path.relative(process.cwd(), moduleFile);
 
-    actions.kill(modulePath, pushHost);
+            actions.kill(modulePath, pushHost);
 }
 
 function writePackageJson(packageFile) {
-	var name = path.basename(path.dirname(packageFile));
-	var obj = {
-		name: name,
-		version: "0.0.1",
-		private: true,
-		description: "A saskavi powered module",
-	}
+    var name = path.basename(path.dirname(packageFile));
+    var obj = {
+        name: name,
+        version: "0.0.1",
+        private: true,
+        description: "A saskavi powered module",
+    }
 
-	fs.writeFileSync(packageFile, JSON.stringify(obj, null, "  "));
+    fs.writeFileSync(packageFile, JSON.stringify(obj, null, "  "));
 }
 
 
@@ -114,21 +114,21 @@ function init(){
     console.log("saskavi init".bold.green);
     var packageFile = path.join(process.cwd(), "package.json");
     if (!fs.existsSync(packageFile)) {
-		console.log("No package.json was found in this directory, generating a fresh one for you.");
-		writePackageJson(packageFile);
+        console.log("No package.json was found in this directory, generating a fresh one for you.");
+        writePackageJson(packageFile);
 
-		var index = path.join(process.cwd(), "index.js");
-		if (!fs.existsSync(index)) {
-			console.log("Writing a bare-bone index.js");
-			fs.writeFileSync(index,
-							 "module.exports.hello = function(name, done) {\n" +
-							 "    done(null, 'Hello ' + name + ', welcome to saskavi!');\n" +
-							 "}\n");
-		}
-	}
-	else {
-		console.log("Adding saskavi to existing package.json".yellow);
-	}
+        var index = path.join(process.cwd(), "index.js");
+        if (!fs.existsSync(index)) {
+            console.log("Writing a bare-bone index.js");
+            fs.writeFileSync(index,
+                             "module.exports.hello = function(name, done) {\n" +
+                                 "    done(null, 'Hello ' + name + ', welcome to saskavi!');\n" +
+                                 "}\n");
+        }
+    }
+    else {
+        console.log("Adding saskavi to existing package.json".yellow);
+    }
 
     var pkg = JSON.parse(fs.readFileSync(packageFile));
 
@@ -140,13 +140,17 @@ function init(){
         fs.writeFileSync(packageFile, JSON.stringify(pkg, null, "  "));
     };
 
-    console.log("    Using module:".yellow, pkg.name);
+    console.log("    using module:".yellow, pkg.name);
 
-	if (pkg.saskavi)
-		return console.log("Sasakvi already initialized in current directory".red);
+    if (pkg.saskavi)
+        return console.log("Sasakvi already initialized in current directory".red);
+
+    var id = uuid.v4();
+
+    console.log("    your app-id:".yellow, id);
 
     // check if firebase.json exists here, if it does pull out the firebase property from it
-	updatePackage({saskavi: uuid.v4()});
+    updatePackage({saskavi: id});
 }
 
 

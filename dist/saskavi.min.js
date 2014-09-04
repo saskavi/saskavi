@@ -1,5 +1,62 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-function isFunction(a){var i={};return a&&"[object Function]"===i.toString.call(a)}var Firebase=require("client-firebase"),Saskavi=function(a){this.rpcBus=new Firebase("https://saskavi.firebaseio.com").child(a).child("__saskavi-rpc")};Saskavi.prototype.call=function(){var a=Array.prototype.slice.call(arguments,0),i=a[0];if(!isFunction(a[a.length-1]))throw new Error("Callback function as last parameter is required, promises may come soon");var n=a[a.length-1];console.log(a);var e=a.slice(1,a.length-1);console.log(e);var r={"function":i,args:e},l=this.rpcBus.push(r),s=l.child("result");s.on("value",function(a){null!==a&&null!==a.val()&&(s.off("value"),n(null,a.val()))})},window.Saskavi=Saskavi;
+// saskavi.js
+// client side script for calling saskavi functions
+//
+
+var Firebase = require("client-firebase");
+var errorUUID = '881962bf-bf47-476e-a157-69078e7380df';
+
+var Saskavi = function(appId) {
+    this.rpcBus = new Firebase("https://saskavi.firebaseio.com").child(appId).child("__saskavi-rpc");
+};
+
+function isFunction(functionToCheck) {
+    var getType = {};
+    return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
+}
+
+function isObject(o) {
+    return Object.prototype.toString.call(o) === '[object Object]';
+}
+
+Saskavi.prototype.call = function() {
+    var params = Array.prototype.slice.call(arguments, 0);
+
+    if (arguments.length === 0)
+        throw new Error("Saskavi calls expect atleast two paramters: a function name and a callback");
+
+    if (!isFunction(params[params.length - 1]))
+        throw new Error("Callback function as last parameter is required, promises may come soon");
+
+    var cb = params[params.length - 1];
+
+    var form = params.slice(0, params.length - 1);
+
+    var rpcData = {
+        "form": form,
+    };
+
+    var rpcRef = this.rpcBus.push(rpcData);
+    var resultRef = rpcRef.child('result');
+
+    resultRef.on('value', function(snapshot) {
+        if (snapshot !== null && snapshot.val() !== null) {
+            resultRef.off('value');
+
+            var result = snapshot.val();
+
+            // if we got an error back, marshal it correctly
+            if (typeof result === 'object' &&
+                result[errorUUID])
+                return cb (new Error(result[errorUUID]));
+
+            cb(null, snapshot.val());
+        }
+    });
+};
+
+window.Saskavi = Saskavi;
+
 },{"client-firebase":2}],2:[function(require,module,exports){
 (function() {var h,aa=this;function n(a){return void 0!==a}function ba(){}function ca(a){a.rb=function(){return a.ld?a.ld:a.ld=new a}}
 function da(a){var b=typeof a;if("object"==b)if(a){if(a instanceof Array)return"array";if(a instanceof Object)return b;var c=Object.prototype.toString.call(a);if("[object Window]"==c)return"object";if("[object Array]"==c||"number"==typeof a.length&&"undefined"!=typeof a.splice&&"undefined"!=typeof a.propertyIsEnumerable&&!a.propertyIsEnumerable("splice"))return"array";if("[object Function]"==c||"undefined"!=typeof a.call&&"undefined"!=typeof a.propertyIsEnumerable&&!a.propertyIsEnumerable("call"))return"function"}else return"null";
