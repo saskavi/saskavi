@@ -30,6 +30,14 @@
     "node-uuid": "~1.4.1"
   },
   "devDependencies": {
-    "http-server": "^0.6.1"
+    "browserify": "^5.11.0",
+    "chai": "^1.9.1",
+    "http-server": "^0.6.1",
+    "karma": "^0.12.23",
+    "karma-browserify": "^0.2.1",
+    "karma-chai": "^0.1.0",
+    "karma-chrome-launcher": "^0.1.4",
+    "karma-mocha": "^0.1.9",
+    "mocha": "^1.21.4"
   }
 }
